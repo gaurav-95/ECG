@@ -23,19 +23,21 @@ def flatten(List_2D):
             List_flat.append(List_2D[i][j])
     return List_flat
 
-def get_foxes(data):
-    peaks, _ = find_peaks(data, height=0)
+def get_noses(data):
+    peaks, _ = find_peaks(data, distance=5, height=0)
     return peaks
 
 def heart_rate(peaks):
     tot_peaks=len(peaks)
-    #print("Total number of peaks:", tot_peaks)
-    per_second=(tot_peaks/2)/timediff
-    #print("\nSystolic peaks (BPS):",per_second)
-    heart_rate=per_second*60
-    #print("\nHeart Rate (BPM):", heart_rate)
+    heart_rate_val=tot_peaks*10
     
-    return heart_rate
+    return heart_rate_val
+
+def get_difference(peak):
+    diff=[]
+    for i in range(len(peak)-1):
+        diff.append(peak[i+1]-peak[i])
+    return diff
 
 def normalize(readings):
     readings = (readings-min(readings))/(max(readings)-min(readings))
@@ -84,12 +86,12 @@ def final_filter(data, fs, order):
     z = lfilter(f, e, y)     
     return z
 
-timediff=60
+timediff=6
 fs = 25
-cutoff_high = 2.5
-cutoff_low = 1
-powerline = 0.9
-order = 3
+cutoff_high = 3
+cutoff_low = 3
+powerline = 1
+order = 2
 
 secret_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJkZWJhbmphbiIsImlhdCI6MTYxNjY0NjA3OH0.Tfyog7lHPADpickUc1itaxdC_fs4_eAxLQDY3G9C5Z4"
 
@@ -141,9 +143,12 @@ def main():
         
         filter_signal = final_filter(readings, fs, order)
         filter_signal = normalize(filter_signal) 
-        peaks_butter=get_foxes(filter_signal)
-        hr_butter=heart_rate(peaks_butter)
-        print(i,"\nHeart Rate (BPM):", hr_butter,"\n",timestamp)
+        peaks_raw=get_noses(filter_signal)
+        diff_raw = get_difference(peaks_raw)
+        diff_raw = sum(diff_raw)/len(diff_raw)
+        time_raw = diff_raw/25
+        hr_raw=time_raw*60
+        print(i,"\nHeart Rate (BPM):", heart_rate(peaks_raw), hr_raw ,"\n",timestamp)
         
 
 sched.add_interval_job(main, seconds = 5)
