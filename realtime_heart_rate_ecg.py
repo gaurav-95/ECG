@@ -86,7 +86,7 @@ def final_filter(data, fs, order):
     z = lfilter(f, e, y)     
     return z
 
-timediff=6
+timediff=1
 fs = 25
 cutoff_high = 3
 cutoff_low = 3
